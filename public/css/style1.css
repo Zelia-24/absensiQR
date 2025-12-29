@@ -1,0 +1,134 @@
+/* Reset dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Body */
+body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Header */
+.header {
+    background-color: #89CFF0; /* baby blue */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+}
+
+.school-name {
+    font-size: 1.8rem;
+    color: #fff;
+}
+
+/* Navbar */
+.nav .btn-login {
+    text-decoration: none;
+    padding: 8px 18px;
+    background-color: #fff;
+    color: #89CFF0;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav .btn-login:hover {
+    background-color: #e0f0ff;
+}
+
+/* Main Content */
+.main-content {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.info-sekolah h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.info-sekolah p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #eee;
+    margin-top: 50px;
+}
+/* ======================
+   ROLE LOGIN SECTION
+====================== */
+.role-section {
+    margin-top: 60px;
+    text-align: center;
+}
+
+.role-section h3 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+/* Grid */
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+/* Card */
+.role-card {
+    background-color: #ffffff;
+    border-radius: 18px;
+    padding: 28px 22px;
+    text-decoration: none;
+    color: #2c3e50;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.role-card span {
+    font-size: 2.5rem;
+}
+
+.role-card h4 {
+    margin-top: 14px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.role-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 8px;
+}
+
+/* Hover */
+.role-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 35px rgba(0,0,0,0.12);
+    background-color: #f4f9ff;
+}
