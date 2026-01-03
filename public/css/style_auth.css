@@ -102,6 +102,24 @@ body {
     background-color: #6bb6e6;
 }
 
+/* REGISTER LINK (INI YANG DITAMBAHKAN) */
+.login-register {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.login-register a {
+    color: #2e86de;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-register a:hover {
+    text-decoration: underline;
+}
+
 /* Footer */
 .login-footer {
     text-align: center;

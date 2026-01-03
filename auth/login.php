@@ -37,20 +37,15 @@ if (isset($_POST['login'])) {
             $_SESSION['name'] = $user['nama'];
             $_SESSION['role'] = $user['role_name'];
 
-            /* Redirect sesuai role */
             switch ($user['role_name']) {
                 case 'admin':
-                    header("Location: ../admin/admin.php");
-                    break;
+                    header("Location: ../admin/admin.php"); break;
                 case 'guru':
-                    header("Location: ../guru/guru.php");
-                    break;
+                    header("Location: ../guru/guru.php"); break;
                 case 'wali':
-                    header("Location: ../wali/wali.php");
-                    break;
+                    header("Location: ../wali/wali.php"); break;
                 case 'siswa':
-                    header("Location: ../siswa/siswa.php");
-                    break;
+                    header("Location: ../siswa/siswa.php"); break;
             }
             exit;
         }
@@ -82,6 +77,7 @@ if (isset($_POST['login'])) {
             <div class="alert"><?= $error ?></div>
         <?php endif; ?>
 
+        <!-- FORM LOGIN -->
         <form method="POST">
             <input type="hidden" name="role" value="<?= $role ?>">
 
@@ -98,10 +94,25 @@ if (isset($_POST['login'])) {
             <button type="submit" name="login" class="btn-login">
                 Login sebagai <?= ucfirst($role) ?>
             </button>
+
+            <!-- REGISTRASI (PAKSA TAMPIL) -->
+            <div style="
+                margin-top:16px;
+                text-align:center;
+                font-size:14px;
+                color:#000;
+                display:block;
+            ">
+                Belum punya akun?
+                <a href="registrasi.php?role=<?= $role ?>"
+                   style="color:#e74c3c; font-weight:700; text-decoration:underline;">
+                    Registrasi dulu
+                </a>
+            </div>
         </form>
 
         <div class="login-footer">
-            <a href="../index.php">← Kembali ke Portal</a>
+            <a href="../index.php">← Kembali ke dashboard</a>
         </div>
 
     </div>
