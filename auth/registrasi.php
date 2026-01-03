@@ -1,165 +1,202 @@
 <?php
 session_start();
-require_once "../config/database.php";
+require_once __DIR__ . "/../config/database.php";
 
-if (isset($_POST['daftar'])) {
+$error = "";
+$success = "";
 
-    $role     = $_POST['role'];
-    $nama     = $_POST['nama'] ?? '';
-    $nis      = $_POST['nis'] ?? '';
-    $nip      = $_POST['nip'] ?? '';
-    $kelas    = $_POST['kelas'] ?? '';
-    $username = $_POST['username'] ?? '';
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+if (isset($_POST['register'])) {
+    $nama       = trim($_POST['nama'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $password   = password_hash($_POST['password'] ?? '', PASSWORD_DEFAULT);
+    $role_nama  = $_POST['role'] ?? null;
+    $kelas_nama = trim($_POST['kelas'] ?? '');
+    $nis        = trim($_POST['nis'] ?? '');
+    $jurusan_nama = trim($_POST['jurusan'] ?? '');
 
-    // ================= SISWA =================
-    if ($role == "siswa") {
-        $stmt = $conn->prepare("
-            INSERT INTO siswa (nama, nis, kelas, password)
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->bind_param("ssss", $nama, $nis, $kelas, $password);
+    if (!$role_nama) {
+        $error = "Silakan pilih role.";
+    } else {
+        $conn->begin_transaction();
+        try {
+            // Ambil role_id
+            $r = $conn->prepare("SELECT role_id FROM roless WHERE role_nama = ? LIMIT 1");
+            $r->bind_param("s", $role_nama);
+            $r->execute();
+            $role = $r->get_result()->fetch_assoc();
+            if (!$role) throw new Exception("Role $role_nama tidak ditemukan di tabel roless");
+            $role_id = $role['role_id'];
 
-        if ($stmt->execute()) {
-            $_SESSION['role'] = 'siswa';
-            $_SESSION['id']   = $conn->insert_id;
+            // Insert user
+            $u = $conn->prepare("INSERT INTO users (nama, email, password, role_id, is_active) VALUES (?, ?, ?, ?, 1)");
+            $u->bind_param("sssi", $nama, $email, $password, $role_id);
+            $u->execute();
+            $user_id = $conn->insert_id;
 
-            header("Location: ../dashboard/index.php");
-            exit;
-        }
-    }
+            if ($role_nama === 'siswa') {
+                if (!$nis || !$kelas_nama || !$jurusan_nama) 
+                    throw new Exception("NIS, Kelas, dan Jurusan wajib diisi untuk siswa");
 
-    // ================= GURU =================
-    if ($role == "guru") {
-        $stmt = $conn->prepare("
-            INSERT INTO guru (nama, nip, password)
-            VALUES (?, ?, ?)
-        ");
-        $stmt->bind_param("sss", $nama, $nip, $password);
+                // Ambil atau insert jurusan
+                $j = $conn->prepare("SELECT jurusan_id FROM jurusan WHERE nama_jurusan = ? LIMIT 1");
+                $j->bind_param("s", $jurusan_nama);
+                $j->execute();
+                $res = $j->get_result()->fetch_assoc();
+                if ($res) $jurusan_id = $res['jurusan_id'];
+                else {
+                    $ji = $conn->prepare("INSERT INTO jurusan (nama_jurusan) VALUES (?)");
+                    $ji->bind_param("s", $jurusan_nama);
+                    $ji->execute();
+                    $jurusan_id = $conn->insert_id;
+                }
 
-        if ($stmt->execute()) {
-            $_SESSION['role'] = 'guru';
-            $_SESSION['id']   = $conn->insert_id;
+                // Ambil atau insert kelas
+                $c = $conn->prepare("SELECT kelas_id FROM kelas WHERE nama_kelas = ?");
+                $c->bind_param("s", $kelas_nama);
+                $c->execute();
+                $kelas = $c->get_result()->fetch_assoc();
+                if ($kelas) $kelas_id = $kelas['kelas_id'];
+                else {
+                    $ci = $conn->prepare("INSERT INTO kelas (nama_kelas) VALUES (?)");
+                    $ci->bind_param("s", $kelas_nama);
+                    $ci->execute();
+                    $kelas_id = $conn->insert_id;
+                }
 
-            header("Location: ../dashboard/index.php");
-            exit;
-        }
-    }
+                // Insert siswa
+                $qr_code = md5($nis . time());
+                $s = $conn->prepare("INSERT INTO siswa (nis, nama, kelas_id, user_id, qr_code, is_active, jurusan_id) VALUES (?, ?, ?, ?, ?, 1, ?)");
+                $s->bind_param("ssissi", $nis, $nama, $kelas_id, $user_id, $qr_code, $jurusan_id);
+                $s->execute();
 
-    // ================= WALIKELAS =================
-    if ($role == "walikelas") {
-        $stmt = $conn->prepare("
-            INSERT INTO walikelas (nama, kelas, password)
-            VALUES (?, ?, ?)
-        ");
-        $stmt->bind_param("sss", $nama, $kelas, $password);
+            } elseif ($role_nama === 'guru') {
+                $g = $conn->prepare("INSERT INTO guru (nama, user_id, is_active) VALUES (?, ?, 1)");
+                $g->bind_param("si", $nama, $user_id);
+                $g->execute();
 
-        if ($stmt->execute()) {
-            $_SESSION['role'] = 'walikelas';
-            $_SESSION['id']   = $conn->insert_id;
+            } elseif ($role_nama === 'walikelas') {
+                $w = $conn->prepare("INSERT INTO walikelas (nama, user_id, is_active) VALUES (?, ?, 1)");
+                $w->bind_param("si", $nama, $user_id);
+                $w->execute();
+            }
 
-            header("Location: ../dashboard/index.php");
-            exit;
-        }
-    }
+            $conn->commit();
+            $success = "Registrasi berhasil untuk role $role_nama. Silakan login.";
 
-    // ================= ADMIN =================
-    if ($role == "admin") {
-        $stmt = $conn->prepare("
-            INSERT INTO admin (username, password)
-            VALUES (?, ?)
-        ");
-        $stmt->bind_param("ss", $username, $password);
-
-        if ($stmt->execute()) {
-            $_SESSION['role'] = 'admin';
-            $_SESSION['id']   = $conn->insert_id;
-
-            header("Location: ../dashboard/index.php");
-            exit;
+        } catch (Exception $e) {
+            $conn->rollback();
+            $error = "Gagal registrasi: " . $e->getMessage();
         }
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Registrasi</title>
+<meta charset="UTF-8">
+<title>Registrasi User</title>
+<link rel="stylesheet" href="../public/css/style_auth.css">
+<style>
+    .form-group { margin-bottom:10px; }
+    .siswa-only { display:none; }
+    .alert { padding:10px; margin-bottom:10px; border-radius:5px; }
+    .alert.error { background:#ffeaea; color:#d32f2f; }
+    .alert.success { background:#eaffea; color:#2e7d32; }
+    .btn-login { display:inline-block; padding:10px 20px; background:#1976d2; color:#fff; text-decoration:none; border-radius:5px; margin-top:10px; }
+    .btn-login:hover { background:#0d47a1; }
+</style>
 </head>
 <body>
 
-<h2>Registrasi Pengguna</h2>
+<div class="login-container">
+<div class="login-card">
 
-<form method="post">
+<div class="login-header">
+    <h2>Registrasi User</h2>
+    <p>Buat akun baru</p>
+</div>
 
-    <select name="role" required onchange="ubahForm(this.value)">
-        <option value="">-- Pilih Role --</option>
-        <option value="siswa">Siswa</option>
-        <option value="guru">Guru</option>
-        <option value="walikelas">Wali Kelas</option>
-        <option value="admin">Admin</option>
-    </select><br><br>
+<?php if ($error): ?>
+<div class="alert error"><?= $error ?></div>
+<?php endif; ?>
 
-    <div id="field_nama">
-        <input type="text" name="nama" placeholder="Nama"><br>
+<?php if ($success): ?>
+<div class="alert success"><?= $success ?></div>
+<?php endif; ?>
+
+<form method="POST">
+    <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" name="nama" value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required>
     </div>
 
-    <div id="field_nis">
-        <input type="text" name="nis" placeholder="NIS"><br>
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
     </div>
 
-    <div id="field_nip">
-        <input type="text" name="nip" placeholder="NIP"><br>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required>
     </div>
 
-    <div id="field_kelas">
-        <input type="text" name="kelas" placeholder="Kelas"><br>
+    <div class="form-group">
+        <label>Role</label>
+        <select name="role" required>
+            <option value="">-- Pilih Role --</option>
+            <option value="siswa" <?= (($_POST['role'] ?? '') === 'siswa') ? 'selected' : '' ?>>Siswa</option>
+            <option value="guru" <?= (($_POST['role'] ?? '') === 'guru') ? 'selected' : '' ?>>Guru</option>
+            <option value="walikelas" <?= (($_POST['role'] ?? '') === 'walikelas') ? 'selected' : '' ?>>Wali Kelas</option>
+        </select>
     </div>
 
-    <div id="field_username">
-        <input type="text" name="username" placeholder="Username"><br>
+    <div class="siswa-only">
+        <div class="form-group">
+            <label>NIS</label>
+            <input type="text" name="nis" value="<?= htmlspecialchars($_POST['nis'] ?? '') ?>">
+        </div>
+
+        <div class="form-group">
+            <label>Kelas</label>
+            <input type="text" name="kelas" value="<?= htmlspecialchars($_POST['kelas'] ?? '') ?>" placeholder="Contoh: X RPL 1">
+        </div>
+
+        <div class="form-group">
+            <label>Jurusan</label>
+            <input type="text" name="jurusan" value="<?= htmlspecialchars($_POST['jurusan'] ?? '') ?>" placeholder="Contoh: RPL, TKJ">
+        </div>
     </div>
 
-    <input type="password" name="password" placeholder="Password" required><br><br>
-
-    <button type="submit" name="daftar">Daftar</button>
+<!-- tombol submit form -->
+ <div style="margin-top:15px; text-align:center;">
+<button type="submit" name="register" class="btn-login">Daftar</button>
 </form>
+</div>
+
+<!-- Tombol Login terpisah, bukan di dalam form -->
+<div style="margin-top:15px; text-align:center;">
+    <a href="login.php" class="btn-login">Login</a>
+</div>
+
+
+</div>
+</div>
 
 <script>
-function ubahForm(role) {
-    const nama     = document.getElementById("field_nama");
-    const nis      = document.getElementById("field_nis");
-    const nip      = document.getElementById("field_nip");
-    const kelas    = document.getElementById("field_kelas");
-    const username = document.getElementById("field_username");
+const roleSelect = document.querySelector('select[name="role"]');
+const siswaFields = document.querySelectorAll('.siswa-only');
 
-    nama.style.display =
-    nis.style.display =
-    nip.style.display =
-    kelas.style.display =
-    username.style.display = "none";
-
-    if (role === "siswa") {
-        nama.style.display = "block";
-        nis.style.display = "block";
-        kelas.style.display = "block";
-    }
-
-    if (role === "guru") {
-        nama.style.display = "block";
-        nip.style.display = "block";
-    }
-
-    if (role === "walikelas") {
-        nama.style.display = "block";
-        kelas.style.display = "block";
-    }
-
-    if (role === "admin") {
-        username.style.display = "block";
+function toggleSiswaFields() {
+    if(roleSelect.value === 'siswa') {
+        siswaFields.forEach(f => f.style.display = 'block');
+    } else {
+        siswaFields.forEach(f => f.style.display = 'none');
     }
 }
+
+roleSelect.addEventListener('change', toggleSiswaFields);
+toggleSiswaFields();
 </script>
 
 </body>
