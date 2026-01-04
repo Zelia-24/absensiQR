@@ -1,19 +1,22 @@
 <?php
 require_once __DIR__ . "/../config/database.php";
-require_once __DIR__ . "/../routes/auth.php";
 
-if (isset($_GET['email'])) {
-    $email = $_GET['email'];
+$token = $_GET['token'] ?? '';
 
-    $stmt = $conn->prepare(
-        "UPDATE users SET is_active=1 WHERE email=?"
-    );
-    $stmt->bind_param("s", $email);
+if (!$token) {
+    die("Token tidak valid");
+}
 
-    if ($stmt->execute()) {
-        echo "Email berhasil diverifikasi.<br>";
-        echo "<a href='login.php'>Login</a>";
-    } else {
-        echo "Verifikasi gagal.";
-    }
+$stmt = $conn->prepare(
+    "UPDATE users 
+     SET is_active = 1, verify_token = NULL 
+     WHERE verify_token = ?"
+);
+$stmt->bind_param("s", $token);
+$stmt->execute();
+
+if ($stmt->affected_rows > 0) {
+    echo "Akun berhasil diverifikasi. <a href='../auth/login.php'>Login</a>";
+} else {
+    echo "Token tidak valid atau akun sudah aktif.";
 }

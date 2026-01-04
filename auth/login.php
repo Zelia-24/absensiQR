@@ -6,7 +6,7 @@ $role = $_GET['role'] ?? '';
 $error = "";
 
 /* Validasi role */
-$allowed_roles = ['siswa', 'guru', 'wali', 'admin'];
+$allowed_roles = ['siswa', 'guru', 'walikelas', 'admin'];
 if (!in_array($role, $allowed_roles)) {
     die("Role tidak valid.");
 }
@@ -17,9 +17,9 @@ if (isset($_POST['login'])) {
     $role_post = $_POST['role'];
 
     $stmt = $conn->prepare("
-        SELECT users.*, roles.role_name 
+        SELECT users.*, roless.role_nama
         FROM users 
-        JOIN roles ON users.role_id = roles.role_id
+        JOIN roless ON users.role_id = roless.role_id
         WHERE users.email = ?
     ");
     $stmt->bind_param("s", $email);
@@ -30,20 +30,20 @@ if (isset($_POST['login'])) {
 
         if ($user['is_active'] == 0) {
             $error = "Akun belum diaktifkan.";
-        } elseif ($user['role_name'] !== $role_post) {
+        } elseif ($user['role_nama'] !== $role_post) {
             $error = "Role tidak sesuai dengan akun.";
         } else {
             $_SESSION['user_id'] = $user['user_id'];
-            $_SESSION['name'] = $user['nama'];
-            $_SESSION['role'] = $user['role_name'];
+            $_SESSION['nama'] = $user['nama'];
+            $_SESSION['role'] = $user['role_nama'];
 
-            switch ($user['role_name']) {
+            switch ($user['role_nama']) {
                 case 'admin':
                     header("Location: ../admin/admin.php"); break;
                 case 'guru':
                     header("Location: ../guru/guru.php"); break;
-                case 'wali':
-                    header("Location: ../wali/wali.php"); break;
+                case 'walikelas':
+                    header("Location: ../walikelas/walikelas.php"); break;
                 case 'siswa':
                     header("Location: ../siswa/siswa.php"); break;
             }
@@ -59,7 +59,7 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <title>Login <?= ucfirst($role) ?> | SMP Pelita Bumi</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta nama="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../public/css/style_auth.css">
 </head>
 <body>
@@ -79,19 +79,19 @@ if (isset($_POST['login'])) {
 
         <!-- FORM LOGIN -->
         <form method="POST">
-            <input type="hidden" name="role" value="<?= $role ?>">
+            <input type="hidden" nama="role" value="<?= $role ?>">
 
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" name="email" required>
+                <input type="email" nama="email" required>
             </div>
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" required>
+                <input type="password" nama="password" required>
             </div>
 
-            <button type="submit" name="login" class="btn-login">
+            <button type="submit" nama="login" class="btn-login">
                 Login sebagai <?= ucfirst($role) ?>
             </button>
 
