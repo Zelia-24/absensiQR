@@ -1,7 +1,4 @@
 <?php
-/* =========================================================
-   SISTEM ABSENSI QR - SINGLE FILE DASHBOARD
-   ========================================================= */
 
 session_start();
 
@@ -9,10 +6,7 @@ session_start();
 $conn = mysqli_connect("localhost", "root", "", "db_absensi");
 if (!$conn) die("Koneksi database gagal");
 
-define('BASE_URL', '/absensi/public');
-
 /* ================== AUTH SIMULASI ================== */
-/* hapus ini jika sudah ada login asli */
 if (!isset($_SESSION['user'])) {
     $_SESSION['user'] = [
         'nama' => 'Administrator'
@@ -84,77 +78,45 @@ while ($r = mysqli_fetch_assoc($qGrafik)) {
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Sistem Absensi QR</title>
+<title>Dashboard Absensi QR</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{margin:0;font-family:Poppins;background:#f4f6f9}
-.wrapper{display:flex;height:100vh}
-.sidebar{width:250px;background:#1e40af;color:#fff;padding:20px}
-.sidebar h2{text-align:center}
-.sidebar a{display:block;color:#fff;padding:12px;border-radius:8px;text-decoration:none;margin:6px 0}
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* LAYOUT */
+body{font-family:Poppins;background:#f4f6f9}
+.wrapper{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:250px;background:#1e40af;color:#fff;padding:20px;flex-shrink:0}
+.sidebar h2{text-align:center;margin-bottom:20px;font-size:24px}
+.sidebar a{display:block;color:#fff;padding:12px;border-radius:8px;text-decoration:none;margin:6px 0;transition:0.2s}
 .sidebar a:hover{background:rgba(255,255,255,.2)}
-.content{flex:1;display:flex;flex-direction:column}
-.navbar{background:#fff;padding:15px 25px;display:flex;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.main{padding:25px;overflow:auto}
+.content{flex:1;display:flex;flex-direction:column;position:relative}
+.navbar{background:#fff;padding:15px 25px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.main{padding:25px;overflow:auto;flex:1}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
 .card{background:#fff;padding:20px;border-radius:14px;box-shadow:0 6px 15px rgba(0,0,0,.08)}
-.card h3{margin:0}
+.card h3{margin:0;color:#1e40af}
 .card p{font-size:32px;font-weight:600;margin:10px 0 0}
+
+/* CHART */
+canvas{pointer-events:none} /* supaya tidak menutupi klik link */
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    .wrapper{flex-direction:column;height:auto}
+    .sidebar{width:100%;display:flex;overflow-x:auto}
+    .sidebar a{flex:1;text-align:center;margin:4px 2px}
+}
 </style>
 </head>
-
 <body>
-<div class="wrapper"><?php
-session_start();
-?>
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Sekolah XYZ</title>
-    <link rel="stylesheet" href="public/css/style.css">
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="logo-container">
-            <img src="public/img//logo.png" alt="Logo Sekolah" class="logo">
-            <h1 class="school-name">Sekolah XYZ</h1>
-        </div>
-        <nav class="nav">
-            <a href="auth/login.php" class="btn-login">Login</a>
-        </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <section class="info-sekolah">
-            <h2>Selamat Datang di Sekolah XYZ</h2>
-            <p>
-                Sekolah XYZ merupakan lembaga pendidikan unggulan yang berfokus pada pengembangan akademik, 
-                karakter, dan kreativitas siswa. Kami menyediakan fasilitas modern dan guru profesional 
-                untuk mendukung pembelajaran berkualitas.
-            </p>
-            <p>
-                Silakan login sesuai peran Anda: <strong>Siswa, Guru, Petugas, atau Admin</strong>.
-            </p>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        &copy; <?= date('Y') ?> Sekolah XYZ. All Rights Reserved.
-    </footer>
-</body>
-</html>
-
+<div class="wrapper">
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -170,30 +132,32 @@ session_start();
 <!-- CONTENT -->
 <div class="content">
 
-<div class="navbar">
-    <div><strong>Sistem Absensi QR</strong></div>
-    <div><i class="fa fa-user"></i> <?= $_SESSION['user']['nama'] ?></div>
-</div>
-
-<div class="main">
-    <h2>Dashboard</h2>
-
-    <!-- RINGKASAN -->
-    <div class="grid">
-        <div class="card"><h3>Total Siswa</h3><p><?= $totalSiswa ?></p></div>
-        <div class="card"><h3>Hadir</h3><p><?= $hadir ?></p></div>
-        <div class="card"><h3>Izin</h3><p><?= $izin ?></p></div>
-        <div class="card"><h3>Alfa</h3><p><?= $alfa ?></p></div>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div><strong>Sistem Absensi QR</strong></div>
+        <div><i class="fa fa-user"></i> <?= $_SESSION['user']['nama'] ?></div>
     </div>
 
-    <br>
+    <!-- MAIN -->
+    <div class="main">
+        <h2>Dashboard</h2>
 
-    <!-- GRAFIK -->
-    <div class="card">
-        <h3>Grafik Absensi 7 Hari Terakhir</h3>
-        <canvas id="grafik"></canvas>
+        <!-- RINGKASAN -->
+        <div class="grid">
+            <div class="card"><h3>Total Siswa</h3><p><?= $totalSiswa ?></p></div>
+            <div class="card"><h3>Hadir</h3><p><?= $hadir ?></p></div>
+            <div class="card"><h3>Izin</h3><p><?= $izin ?></p></div>
+            <div class="card"><h3>Alfa</h3><p><?= $alfa ?></p></div>
+        </div>
+
+        <br>
+
+        <!-- GRAFIK -->
+        <div class="card">
+            <h3>Grafik Absensi 7 Hari Terakhir</h3>
+            <canvas id="grafik"></canvas>
+        </div>
     </div>
-</div>
 
 </div>
 </div>
@@ -204,17 +168,18 @@ new Chart(document.getElementById('grafik'), {
     data: {
         labels: <?= json_encode($tanggal) ?>,
         datasets: [
-            { label: 'Hadir', data: <?= json_encode($hadirArr) ?> },
-            { label: 'Terlambat', data: <?= json_encode($terlambatArr) ?> },
-            { label: 'Izin', data: <?= json_encode($izinArr) ?> },
-            { label: 'Alfa', data: <?= json_encode($alfaArr) ?> }
+            { label: 'Hadir', data: <?= json_encode($hadirArr) ?>, backgroundColor:'#16a34a' },
+            { label: 'Terlambat', data: <?= json_encode($terlambatArr) ?>, backgroundColor:'#f59e0b' },
+            { label: 'Izin', data: <?= json_encode($izinArr) ?>, backgroundColor:'#3b82f6' },
+            { label: 'Alfa', data: <?= json_encode($alfaArr) ?>, backgroundColor:'#ef4444' }
         ]
     },
     options: {
         responsive: true,
-        scales: { y: { beginAtZero: true } }
+        scales: { y: { beginAtZero: true, stepSize: 1 } }
     }
 });
 </script>
+
 </body>
 </html>

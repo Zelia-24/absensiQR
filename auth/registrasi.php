@@ -9,7 +9,7 @@ if (isset($_POST['registrasi'])) {
     $nama     = trim($_POST['nama']);
     $email    = trim($_POST['email']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $role     = $_POST['roless'];
+    $role     = $_POST['roless'] ?? '';
 
     $nis        = $_POST['nis'] ?? '';
     $kelas_nama = $_POST['kelas'] ?? '';
@@ -18,7 +18,7 @@ if (isset($_POST['registrasi'])) {
     try {
         $conn->begin_transaction();
 
-        /* ===== CEK ROLE ===== */
+        // ===== CEK ROLE =====
         $r = $conn->prepare("SELECT role_id FROM roless WHERE role_nama=?");
         $r->bind_param("s", $role);
         $r->execute();
@@ -27,22 +27,20 @@ if (isset($_POST['registrasi'])) {
 
         $role_id = $roleRow['role_id'];
 
-        /* ===== INSERT USERS ===== */
-        $u = $conn->prepare("
-            INSERT INTO users (nama,email,password,role_id,is_active)
-            VALUES (?,?,?,?,1)
-        ");
+        // ===== INSERT USERS =====
+        $u = $conn->prepare("INSERT INTO users (nama,email,password,role_id,is_active) VALUES (?,?,?,?,1)");
         $u->bind_param("sssi", $nama, $email, $password, $role_id);
         $u->execute();
         $user_id = $conn->insert_id;
 
-        /* ===== SISWA ===== */
+        // ===== SISWA =====
         if ($role === 'siswa') {
 
             if (!$nis || !$kelas_nama || !$jurusan_id) {
                 throw new Exception("Data siswa belum lengkap");
             }
 
+            // Cek kelas
             $c = $conn->prepare("SELECT kelas_id FROM kelas WHERE nama_kelas=?");
             $c->bind_param("s", $kelas_nama);
             $c->execute();
@@ -51,10 +49,7 @@ if (isset($_POST['registrasi'])) {
             if ($kelas) {
                 $kelas_id = $kelas['kelas_id'];
             } else {
-                $ci = $conn->prepare("
-                    INSERT INTO kelas (nama_kelas,jurusan_id)
-                    VALUES (?,?)
-                ");
+                $ci = $conn->prepare("INSERT INTO kelas (nama_kelas,jurusan_id) VALUES (?,?)");
                 $ci->bind_param("si", $kelas_nama, $jurusan_id);
                 $ci->execute();
                 $kelas_id = $conn->insert_id;
@@ -62,41 +57,30 @@ if (isset($_POST['registrasi'])) {
 
             $qr_code = md5($nis . time());
 
-            $s = $conn->prepare("
-                INSERT INTO siswa
-                (nis,nama,kelas_id,jurusan_id,user_id,qr_code,is_active)
-                VALUES (?,?,?,?,?, ?,1)
-            ");
-            $s->bind_param(
-                "ssiiis",
-                $nis,
-                $nama,
-                $kelas_id,
-                $jurusan_id,
-                $user_id,
-                $qr_code
-            );
+            $s = $conn->prepare("INSERT INTO siswa (nis,nama,kelas_id,jurusan_id,user_id,qr_code,is_active) VALUES (?,?,?,?,?, ?,1)");
+            $s->bind_param("ssiiis", $nis, $nama, $kelas_id, $jurusan_id, $user_id, $qr_code);
             $s->execute();
         }
 
-        /* ===== GURU ===== */
+        // ===== GURU =====
         if ($role === 'guru') {
-            $g = $conn->prepare("
-                INSERT INTO guru (nama,user_id,is_active)
-                VALUES (?, ?,1)
-            ");
+            $g = $conn->prepare("INSERT INTO guru (nama,user_id,is_active) VALUES (?, ?,1)");
             $g->bind_param("si", $nama, $user_id);
             $g->execute();
         }
 
-        /* ===== WALIKELAS ===== */
+        // ===== WALIKELAS =====
         if ($role === 'walikelas') {
-            $w = $conn->prepare("
-                INSERT INTO walikelas (nama,user_id,is_active)
-                VALUES (?, ?,1)
-            ");
+            $w = $conn->prepare("INSERT INTO walikelas (nama,user_id,is_active) VALUES (?, ?,1)");
             $w->bind_param("si", $nama, $user_id);
             $w->execute();
+        }
+
+        // ===== ADMIN =====
+        if ($role === 'admin') {
+            $a = $conn->prepare("INSERT INTO admin (nama,user_id,is_active) VALUES (?, ?,1)");
+            $a->bind_param("si", $nama, $user_id);
+            $a->execute();
         }
 
         $conn->commit();
@@ -111,6 +95,7 @@ if (isset($_POST['registrasi'])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -185,9 +170,11 @@ button{
 <option value="siswa">Siswa</option>
 <option value="guru">Guru</option>
 <option value="walikelas">Wali Kelas</option>
+<option value="admin">Admin</option>
 </select>
 </div>
 
+<!-- Form khusus siswa -->
 <div class="siswa-only" id="siswaBox">
 <div class="form-group">
 <label>NIS</label>
