@@ -1,67 +1,58 @@
 <?php
 session_start();
-require_once __DIR__ . "/../config/database.php";
+require_once "../config/database.php";
 
 /* =====================
-   VALIDASI LOGIN SISWA
+   VALIDASI LOGIN
 ===================== */
-if (
-    !isset($_SESSION['role']) ||
-    $_SESSION['role'] !== 'siswa' ||
-    !isset($_SESSION['siswa_id'])
-) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'siswa') {
     die("Akses ditolak. Silakan login kembali.");
+}
+
+/* =====================
+   VALIDASI SESSION
+===================== */
+if (!isset($_SESSION['siswa_id'])) {
+    die("Session siswa tidak ditemukan. Silakan login ulang.");
 }
 
 /* =====================
    VALIDASI INPUT
 ===================== */
-if (!isset($_POST['kode']) || trim($_POST['kode']) === '') {
+if (empty($_POST['kode'])) {
     die("Kode absensi tidak boleh kosong");
 }
 
-$kode     = trim($_POST['kode']);
-$siswa_id = (int) $_SESSION['siswa_id'];
-
-$tanggal = date("Y-m-d");
-$jam     = date("H:i:s");
+$kode     = trim($_POST['kode']);   // hasil scan QR
+$siswa_id = $_SESSION['siswa_id'];
+$nis      = $_SESSION['nis'];
+$tanggal  = date("Y-m-d");
+$jam      = date("H:i:s");
 
 /* =====================
-   CEK KODE ABSENSI
+   VALIDASI QR = NIS
 ===================== */
-$cekKode = $conn->prepare("
-    SELECT kode 
-    FROM absensi_kode
-    WHERE kode = ? AND aktif = 1
-    LIMIT 1
-");
-$cekKode->bind_param("s", $kode);
-$cekKode->execute();
-$kodeValid = $cekKode->get_result()->fetch_assoc();
-
-if (!$kodeValid) {
-    die("❌ Kode absensi tidak valid atau sudah tidak aktif");
+if ($kode !== $nis) {
+    die("❌ QR Code tidak valid untuk akun ini");
 }
 
 /* =====================
    CEK ABSENSI HARI INI
 ===================== */
-$cekAbsen = $conn->prepare("
+$cek = $conn->prepare("
     SELECT jam_masuk, jam_keluar
     FROM absensi
     WHERE siswa_id = ? AND tanggal = ?
-    LIMIT 1
 ");
-$cekAbsen->bind_param("is", $siswa_id, $tanggal);
-$cekAbsen->execute();
-$absen = $cekAbsen->get_result()->fetch_assoc();
+$cek->bind_param("is", $siswa_id, $tanggal);
+$cek->execute();
+$data = $cek->get_result()->fetch_assoc();
 
 /* =====================
    PROSES ABSENSI
 ===================== */
-if (!$absen) {
+if (!$data) {
 
-    // ABSEN MASUK
     $stmt = $conn->prepare("
         INSERT INTO absensi (siswa_id, tanggal, jam_masuk, status)
         VALUES (?, ?, ?, 'Hadir')
@@ -72,9 +63,8 @@ if (!$absen) {
     $pesan = "✅ Absen masuk berhasil";
     $info  = "Jam masuk: $jam";
 
-} elseif (empty($absen['jam_keluar'])) {
+} elseif (empty($data['jam_keluar'])) {
 
-    // ABSEN KELUAR
     $stmt = $conn->prepare("
         UPDATE absensi
         SET jam_keluar = ?
@@ -87,50 +77,42 @@ if (!$absen) {
     $info  = "Jam keluar: $jam";
 
 } else {
-    die("⚠️ Kamu sudah melakukan absen masuk dan keluar hari ini");
+    die("⚠️ Kamu sudah absen masuk & keluar hari ini");
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>Hasil Absensi</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body{
-    background:#f2f7ff;
-    font-family:Poppins,sans-serif;
-    padding:40px
-}
-.card{
+body{font-family:Arial;background:#eef2ff;padding:40px}
+.box{
     background:#fff;
-    max-width:420px;
+    max-width:400px;
     margin:auto;
-    padding:30px;
-    border-radius:18px;
-    box-shadow:0 12px 30px rgba(0,0,0,.15);
-    text-align:center
+    padding:25px;
+    border-radius:14px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.15)
 }
-h3{color:#2a6df4}
-p{margin:10px 0}
 a{
     display:inline-block;
-    margin-top:20px;
-    text-decoration:none;
+    margin-top:18px;
+    background:#2563eb;
     color:#fff;
-    background:#2a6df4;
-    padding:10px 18px;
-    border-radius:12px;
-    font-weight:600
+    padding:10px 16px;
+    border-radius:10px;
+    text-decoration:none
 }
 </style>
 </head>
 <body>
 
-<div class="card">
-    <h3><?= htmlspecialchars($pesan) ?></h3>
-    <p><?= htmlspecialchars($info) ?></p>
-
+<div class="box">
+    <h3><?= $pesan ?></h3>
+    <p><?= $info ?></p>
     <a href="../siswa/dashboard_siswa.php">Kembali ke Dashboard</a>
 </div>
 

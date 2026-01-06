@@ -106,7 +106,7 @@ a{
 
     <a href="export_excel.php" class="btn">⬇ Export Excel</a>
     <br><br>
-    <a href="../siswa/dashboard_siswa.php">← Kembali ke Dashboard</a>
+    <a href="../siswa/siswa.php">← Kembali ke Dashboard</a>
 </div>
 
 </body>
