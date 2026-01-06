@@ -149,7 +149,7 @@ $siswa = $conn->query("
 <!-- HEADER -->
 <header>
     <h2>Dashboard Siswa</h2>
-    <a href="../../auth/logout.php">Logout</a>
+    <a href="../auth/logout.php">Logout</a>
 </header>
 
 <!-- CONTENT -->

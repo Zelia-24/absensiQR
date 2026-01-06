@@ -1,10 +1,12 @@
 <?php
 session_start();
 
-/* =====================
-   VALIDASI LOGIN SISWA
-===================== */
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'siswa') {
+/* ============================
+   VALIDASI LOGIN MULTI ROLE
+============================ */
+$allowed_roles = ['siswa','guru','walikelas','admin'];
+
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], $allowed_roles)) {
     header("Location: ../auth/login.php");
     exit;
 }
