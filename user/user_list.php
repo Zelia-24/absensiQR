@@ -3,7 +3,7 @@ require_once "../config/database.php";
 if ($_SESSION['role_id'] != 1) die("Akses ditolak");
 
 $result = $conn->query("
-    SELECT u.user_id, u.name, u.email, r.role_name, u.is_active
+    SELECT u.user_id, u.nama, u.email, r.role_name, u.is_active
     FROM users u
     JOIN roles r ON u.role_id = r.role_id
 ");
@@ -21,7 +21,7 @@ $result = $conn->query("
 
 <?php while ($u = $result->fetch_assoc()): ?>
 <tr>
-    <td><?= $u['name'] ?></td>
+    <td><?= $u['nama'] ?></td>
     <td><?= $u['email'] ?></td>
     <td><?= $u['role_name'] ?></td>
     <td><?= $u['is_active'] ? 'Aktif' : 'Nonaktif' ?></td>

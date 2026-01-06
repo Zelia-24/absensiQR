@@ -18,7 +18,7 @@ if ($_SESSION['role'] !== 'siswa') {
 </header>
 
 <div class="container">
-    <h2>Halo, <?= $_SESSION['name']; ?></h2>
+    <h2>Halo, <?= $_SESSION['nama']; ?></h2>
 
     <div class="card-grid">
         <div class="card">

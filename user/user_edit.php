@@ -6,7 +6,7 @@ $id = $_GET['id'];
 $user = $conn->query("SELECT * FROM users WHERE user_id=$id")->fetch_assoc();
 
 if (isset($_POST['update'])) {
-    $name  = $_POST['name'];
+    $name  = $_POST['nama'];
     $email = $_POST['email'];
 
     $stmt = $conn->prepare("UPDATE users SET name=?, email=? WHERE user_id=?");
@@ -18,7 +18,7 @@ if (isset($_POST['update'])) {
 ?>
 
 <form method="POST">
-    <input type="text" name="name" value="<?= $user['name'] ?>" required><br>
+    <input type="text" name="nama" value="<?= $user['name'] ?>" required><br>
     <input type="email" name="email" value="<?= $user['email'] ?>" required><br>
     <button name="update">Update</button>
 </form>

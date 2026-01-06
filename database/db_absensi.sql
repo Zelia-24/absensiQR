@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 29, 2025 at 01:54 AM
+-- Generation Time: Jan 04, 2026 at 06:31 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -133,6 +133,17 @@ CREATE TABLE `jurusan` (
   `nama_jurusan` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Dumping data for table `jurusan`
+--
+
+INSERT INTO `jurusan` (`jurusan_id`, `nama_jurusan`) VALUES
+(1, 'multimedia'),
+(2, 'tata boga'),
+(3, 'RPL'),
+(4, 'TKLJ'),
+(5, 'DKV');
+
 -- --------------------------------------------------------
 
 --
@@ -144,6 +155,14 @@ CREATE TABLE `kelas` (
   `jurusan_id` int NOT NULL,
   `nama_kelas` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `kelas`
+--
+
+INSERT INTO `kelas` (`kelas_id`, `jurusan_id`, `nama_kelas`) VALUES
+(1, 2, '8'),
+(3, 5, '9');
 
 -- --------------------------------------------------------
 
@@ -176,9 +195,34 @@ CREATE TABLE `menu_access` (
 --
 
 CREATE TABLE `roles` (
-  `role_id` int NOT NULL,
-  `role_name` varchar(50) NOT NULL
+  `role_idsalah` int NOT NULL,
+  `role_namasalah` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `role_siswasalah` varchar(140) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `role_gurusalah` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `role_walikelassalah` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `role_adminsalah` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roless`
+--
+
+CREATE TABLE `roless` (
+  `role_id` int NOT NULL,
+  `role_nama` varchar(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `roless`
+--
+
+INSERT INTO `roless` (`role_id`, `role_nama`) VALUES
+(1, 'admin'),
+(2, 'guru'),
+(4, 'siswa'),
+(3, 'walikelas');
 
 -- --------------------------------------------------------
 
@@ -191,10 +235,19 @@ CREATE TABLE `siswa` (
   `nis` varchar(20) NOT NULL,
   `nama` varchar(100) NOT NULL,
   `kelas_id` int NOT NULL,
+  `jurusan_id` int NOT NULL,
   `user_id` int DEFAULT NULL,
   `qr_code` varchar(255) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `siswa`
+--
+
+INSERT INTO `siswa` (`siswa_id`, `nis`, `nama`, `kelas_id`, `jurusan_id`, `user_id`, `qr_code`, `is_active`) VALUES
+(2, '78906', 'alfi', 1, 2, 74, '698e27da0fe0b9bcdd8c08e873fbfdb5', 1),
+(4, '0987654321', 'sasi', 3, 5, 77, 'ca52e7e98bc72e76ce04f070c43a2b33', 1);
 
 -- --------------------------------------------------------
 
@@ -218,12 +271,21 @@ CREATE TABLE `submenu` (
 CREATE TABLE `users` (
   `user_id` int NOT NULL,
   `role_id` int NOT NULL,
-  `name` varchar(100) NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `is_active` tinyint(1) DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`user_id`, `role_id`, `nama`, `email`, `password`, `is_active`, `created_at`) VALUES
+(11, 3, 'Alfi', 'alfi@email.com', '123456', 0, '2026-01-03 22:51:14'),
+(74, 4, 'alfi', 'alfirestizelia@gmail.com', '$2y$10$/fCuzLlNpckHCOwLBqtbd.nd.NZchDFnhmigPRuVIR1dI7AyJa.Dq', 1, '2026-01-04 12:00:50'),
+(77, 4, 'sasi', 'sasimaelani@gmail.com', '$2y$10$WwptSVahCkYFtO3y61hR9Okg6npW/xz1CpHY0MM3mDNO/XwHPj2YW', 1, '2026-01-04 12:04:30');
 
 --
 -- Indexes for dumped tables
@@ -287,16 +349,26 @@ ALTER TABLE `menu_access`
 -- Indexes for table `roles`
 --
 ALTER TABLE `roles`
-  ADD PRIMARY KEY (`role_id`);
+  ADD PRIMARY KEY (`role_idsalah`);
+
+--
+-- Indexes for table `roless`
+--
+ALTER TABLE `roless`
+  MODIFY role_id INT NOT NULL AUTO_INCREMENT,
+  ADD PRIMARY KEY (`role_id`),
+  ADD UNIQUE KEY `role_nama` (`role_nama`);
 
 --
 -- Indexes for table `siswa`
 --
 ALTER TABLE `siswa`
+  MODIFY siswa_id INT NOT NULL AUTO_INCREMENT,
   ADD PRIMARY KEY (`siswa_id`),
   ADD UNIQUE KEY `nis` (`nis`),
   ADD UNIQUE KEY `user_id` (`user_id`),
-  ADD KEY `kelas_id` (`kelas_id`);
+  ADD KEY `kelas_id` (`kelas_id`),
+  ADD KEY `fk_siswa_jurusan` (`jurusan_id`);
 
 --
 -- Indexes for table `submenu`
@@ -309,9 +381,10 @@ ALTER TABLE `submenu`
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
+  MODIFY user_id INT NOT NULL AUTO_INCREMENT,
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `role_id` (`role_id`);
+  ADD KEY `users_ibfk_1` (`role_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -345,13 +418,13 @@ ALTER TABLE `jam_absen`
 -- AUTO_INCREMENT for table `jurusan`
 --
 ALTER TABLE `jurusan`
-  MODIFY `jurusan_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `jurusan_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `kelas`
 --
 ALTER TABLE `kelas`
-  MODIFY `kelas_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `kelas_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `menu`
@@ -369,13 +442,19 @@ ALTER TABLE `menu_access`
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `role_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `role_idsalah` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `roless`
+--
+ALTER TABLE `roless`
+  MODIFY `role_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `siswa`
 --
 ALTER TABLE `siswa`
-  MODIFY `siswa_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `siswa_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `submenu`
@@ -387,7 +466,7 @@ ALTER TABLE `submenu`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- Constraints for dumped tables
@@ -416,13 +495,14 @@ ALTER TABLE `kelas`
 -- Constraints for table `menu_access`
 --
 ALTER TABLE `menu_access`
-  ADD CONSTRAINT `menu_access_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `menu_access_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_idsalah`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `menu_access_ibfk_2` FOREIGN KEY (`submenu_id`) REFERENCES `submenu` (`submenu_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `siswa`
 --
 ALTER TABLE `siswa`
+  ADD CONSTRAINT `fk_siswa_jurusan` FOREIGN KEY (`jurusan_id`) REFERENCES `jurusan` (`jurusan_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `siswa_ibfk_1` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`kelas_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `siswa_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -436,7 +516,7 @@ ALTER TABLE `submenu`
 -- Constraints for table `users`
 --
 ALTER TABLE `users`
-  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roless` (`role_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 DELIMITER $$
 --

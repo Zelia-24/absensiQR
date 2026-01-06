@@ -15,7 +15,7 @@ define('BASE_URL', '/absensi/public');
 /* hapus ini jika sudah ada login asli */
 if (!isset($_SESSION['user'])) {
     $_SESSION['user'] = [
-        'name' => 'Administrator'
+        'nama' => 'Administrator'
     ];
 }
 
@@ -172,7 +172,7 @@ session_start();
 
 <div class="navbar">
     <div><strong>Sistem Absensi QR</strong></div>
-    <div><i class="fa fa-user"></i> <?= $_SESSION['user']['name'] ?></div>
+    <div><i class="fa fa-user"></i> <?= $_SESSION['user']['nama'] ?></div>
 </div>
 
 <div class="main">

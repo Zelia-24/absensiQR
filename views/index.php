@@ -8,7 +8,7 @@ cekLogin();
 
 <div class="container">
     <h2>Dashboard Absensi</h2>
-    <p>Selamat datang, <b><?= $_SESSION['name'] ?></b></p>
+    <p>Selamat datang, <b><?= $_SESSION['nama'] ?></b></p>
 
     <!-- STATISTIK RINGKAS -->
     <div style="display:flex; gap:20px; margin-top:20px;">
