@@ -159,15 +159,17 @@ $siswa = $conn->query("
 
     <!-- MENU (BISA DIKLIK) -->
     <div class="menu">
-        <a href="camera.php" class="menu-card">
-            <h3>📷 Absensi QR</h3>
-            <p>Lakukan absensi dengan scan QR Code</p>
-        </a>
+<a href="../absensi/scan_qr.php" class="menu-card">
+    <h3>📷 Absensi QR</h3>
+    <p>Lakukan absensi dengan scan QR Code</p>
+</a>
 
-        <a href="riwayat_kehadiran.php" class="menu-card">
-            <h3>📊 Riwayat Kehadiran</h3>
-            <p>Lihat kehadiran harian</p>
-        </a>
+
+      <a href="../laporan/laporan_absensi.php" class="menu-card">
+    <h3>📊 Riwayat Kehadiran</h3>
+    <p>Lihat kehadiran harian</p>
+</a>
+
 
         <a href="siswa_detail.php" class="menu-card">
             <h3>👤 Profil Siswa</h3>
