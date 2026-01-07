@@ -3,41 +3,56 @@ session_start();
 require_once "../config/database.php";
 
 /* =====================
-   VALIDASI LOGIN
+   VALIDASI LOGIN SISWA
 ===================== */
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'siswa') {
-    die("Akses ditolak. Silakan login kembali.");
+    die("Akses ditolak. Silakan login sebagai siswa.");
+}
+
+if (!isset($_SESSION['user_id'])) {
+    die("Session login tidak ditemukan. Silakan login ulang.");
 }
 
 /* =====================
-   VALIDASI SESSION
+   AMBIL siswa_id DARI TABEL siswa
 ===================== */
-if (!isset($_SESSION['siswa_id'])) {
-    die("Session siswa tidak ditemukan. Silakan login ulang.");
+$get = $conn->prepare("
+    SELECT siswa_id FROM siswa WHERE user_id = ?
+");
+$get->bind_param("i", $_SESSION['user_id']);
+$get->execute();
+$row = $get->get_result()->fetch_assoc();
+
+if (!$row) {
+    die("Data siswa tidak ditemukan");
 }
 
+$siswa_id = $row['siswa_id'];
+
 /* =====================
-   VALIDASI INPUT
+   VALIDASI INPUT QR
 ===================== */
 if (empty($_POST['kode'])) {
     die("Kode absensi tidak boleh kosong");
 }
 
-$kode     = trim($_POST['kode']);   // hasil scan QR
-$siswa_id = $_SESSION['siswa_id'];
-$nis      = $_SESSION['nis'];
-$tanggal  = date("Y-m-d");
-$jam      = date("H:i:s");
+$kode = trim($_POST['kode']);
 
 /* =====================
-   VALIDASI QR = NIS
+   VALIDASI QR (ISI QR = user_id)
 ===================== */
-if ($kode !== $nis) {
+if ((string)$kode !== (string)$_SESSION['user_id']) {
     die("❌ QR Code tidak valid untuk akun ini");
 }
 
 /* =====================
-   CEK ABSENSI HARI INI
+   WAKTU
+===================== */
+$tanggal = date("Y-m-d");
+$jam     = date("H:i:s");
+
+/* =====================
+   CEK ABSEN HARI INI
 ===================== */
 $cek = $conn->prepare("
     SELECT jam_masuk, jam_keluar
@@ -53,6 +68,7 @@ $data = $cek->get_result()->fetch_assoc();
 ===================== */
 if (!$data) {
 
+    // ABSEN MASUK
     $stmt = $conn->prepare("
         INSERT INTO absensi (siswa_id, tanggal, jam_masuk, status)
         VALUES (?, ?, ?, 'Hadir')
@@ -65,6 +81,7 @@ if (!$data) {
 
 } elseif (empty($data['jam_keluar'])) {
 
+    // ABSEN KELUAR
     $stmt = $conn->prepare("
         UPDATE absensi
         SET jam_keluar = ?
@@ -113,7 +130,7 @@ a{
 <div class="box">
     <h3><?= $pesan ?></h3>
     <p><?= $info ?></p>
-    <a href="../siswa/dashboard_siswa.php">Kembali ke Dashboard</a>
+    <a href="../siswa/siswa.php">Kembali ke Dashboard</a>
 </div>
 
 </body>
