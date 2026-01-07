@@ -2,24 +2,22 @@
 session_start();
 require_once __DIR__ . "/../config/database.php";
 
-/* Ambil siswa_id dari session */
-$siswa_id = $_SESSION['siswa_id'] ?? null;
-
-if (!$siswa_id) {
-    die("Akses ditolak. Siswa belum login.");
+if (
+    !isset($_SESSION['user_id'], $_SESSION['role']) ||
+    $_SESSION['role'] !== 'siswa'
+) {
+    die("Akses ditolak");
 }
 
-/* Query absensi */
-$query = "
+$siswa_id = $_SESSION['user_id'];
+
+$stmt = $conn->prepare("
     SELECT *
     FROM absensi
-    WHERE siswa_id = '$siswa_id'
+    WHERE siswa_id = ?
     ORDER BY tanggal DESC
-";
-
-$result = $conn->query($query);
-
-if (!$result) {
-    die("Query error: " . $conn->error);
-}
+");
+$stmt->bind_param("i", $siswa_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
