@@ -1,37 +1,121 @@
-/* ======================
+/* Reset dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Body */
+body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Header */
+.header {
+    background-color: #89CFF0; /* baby blue */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+}
+
+.school-name {
+    font-size: 1.8rem;
+    color: #fff;
+}
+
+/* Navbar */
+.nav .btn-login {
+    text-decoration: none;
+    padding: 8px 18px;
+    background-color: #fff;
+    color: #89CFF0;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav .btn-login:hover {
+    background-color: #e0f0ff;
+}
+
+/* Main Content */
+.main-content {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.info-sekolah h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.info-sekolah p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #eee;
+    margin-top: 50px;
+}/* ======================
    ROLE LOGIN SECTION
 ====================== */
 .role-section {
-    margin-top: 70px;
+    margin-top: 50px; /* dikurangi */
     text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .role-section h3 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    margin-bottom: 40px;
-    color: #2c3e50;
+    margin-bottom: 30px;
+    color: #0d47a1;
 }
 
 /* Grid 2 x 2 */
 .role-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* FIX 2 kolom */
-    gap: 30px;
-    max-width: 700px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px; /* lebih rapat */
+    max-width: 500px; /* lebih kecil */
     margin: 0 auto;
 }
 
 /* Card */
 .role-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 35px 25px;
+    background: linear-gradient(145deg, #2196f3, #64b5f6);
+    border-radius: 12px; /* lebih kecil */
+    padding: 25px 15px; /* lebih ringkas */
     text-decoration: none;
-    color: #2c3e50;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     transition: all 0.3s ease;
-    border: 1px solid #f0f0f0;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Icon */
@@ -39,35 +123,46 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 70px;
-    height: 70px;
-    margin-bottom: 15px;
+    width: 50px; /* lebih kecil */
+    height: 50px;
+    margin-bottom: 10px;
     border-radius: 50%;
-    background-color: #eaf6ff;
-    color: #4da3ff;
-    font-size: 2.2rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1.6rem; /* lebih kecil */
+    transition: all 0.3s ease;
 }
 
 /* Title */
 .role-card h4 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
 }
 
 /* Description */
 .role-card p {
-    font-size: 0.95rem;
-    color: #666;
-    line-height: 1.5;
+    font-size: 0.85rem;
+    color: #e0f7ff;
+    line-height: 1.4;
+    text-align: center;
 }
 
 /* Hover Effect */
 .role-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
-    border-color: #cce5ff;
-    background-color: #f9fcff;
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    background: linear-gradient(145deg, #42a5f5, #90caf9);
+}
+
+.role-card:hover span {
+    background-color: rgba(255,255,255,0.35);
+}
+
+/* Active/Click Effect */
+.role-card:active {
+    transform: translateY(-1px) scale(0.97);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 /* Responsive (HP) */
