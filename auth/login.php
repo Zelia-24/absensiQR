@@ -164,6 +164,10 @@ button:hover{
         </div>
 
         <button name="login">Login</button>
+         <div class="register-text">
+            <a href="/absensiQR/index.php">Kembali ke Dashboard</a>
+        </div>
+        
     </form>
 </div>
 

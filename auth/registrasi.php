@@ -135,6 +135,19 @@ button{
     border-radius:6px;
     font-size:16px;
 }
+.kembali-text{
+    text-align:center;
+    font-size:14px;
+    margin:10px 0 12px;
+}
+.kembali-text a{
+    color:#1565c0;
+    font-weight:bold;
+    text-decoration:none;
+}
+.kembali-text a:hover{
+    text-decoration:underline;
+}
 .siswa-only{display:none;margin-top:10px}
 .error{text-align:center;color:#c62828}
 </style>
@@ -201,6 +214,9 @@ while($j=mysqli_fetch_assoc($q)){
 </div>
 
 <button name="registrasi">Daftar</button>
+<div class="kembali-text">
+            <a href="/absensiQR/index.php">Kembali ke Dashboard</a>
+        </div>
 </form>
 </div>
 
